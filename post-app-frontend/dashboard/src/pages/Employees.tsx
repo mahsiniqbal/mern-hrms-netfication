@@ -4,8 +4,12 @@ import { useEmployeesServices } from "../hooks/employees/useEmployeesServices";
 import { IEmployee } from "../utils/api/types";
 
 const EmployeesCrudPage = () => {
-	const { EmployeesDataSource, employeesCache } = useEmployeesServices();
+	const { EmployeesDataSource, employeesCache, employees } =
+		useEmployeesServices();
 	const { employeeId } = useParams();
+	const employeeName = employees.find(
+		emp => emp.id.toString() === employeeId
+	)?.empName;
 	return (
 		<Crud<IEmployee>
 			dataSource={EmployeesDataSource}
@@ -14,9 +18,9 @@ const EmployeesCrudPage = () => {
 			initialPageSize={10}
 			defaultValues={{ itemCount: 1 }}
 			pageTitles={{
-				show: `Employee ${employeeId}`,
+				show: `${employeeName}`,
 				create: "New Employee",
-				edit: `Employee ${employeeId} - Edit`,
+				edit: `${employeeName ?? ""} - Edit`,
 			}}
 		/>
 	);

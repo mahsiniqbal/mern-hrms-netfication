@@ -1,5 +1,6 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Outlet } from "react-router";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
 import type { Branding, Navigation } from "@toolpad/core/AppProvider";
@@ -18,6 +19,12 @@ const NAVIGATION: Navigation = [
 		title: "Employees",
 		icon: <PersonIcon />,
 		pattern: "employees{/:employeeId}*",
+	},
+	{
+		segment: "attendance",
+		title: "Attendance",
+		icon: <CalendarMonthIcon />,
+		pattern: "attendance{/:attendanceId}*",
 	},
 ];
 

@@ -172,7 +172,6 @@ export const useEmployeesServices = () => {
 			return newEmployee;
 		},
 		updateOne: async (employeeId, data) => {
-			console.log(employeeId, data);
 			const employeesStore = employees;
 			let updatedEmployee: IEmployee | null = null;
 			setEmployees(
@@ -199,22 +198,28 @@ export const useEmployeesServices = () => {
 			);
 		},
 
-		validate: z.object({
-			empName: z
-				.string({ required_error: "Name is required" })
-				.nonempty("Name is required"),
-			position: z.string({ required_error: "Age is required" }),
-			hireDate: z
-				.string({ required_error: "Join date is required" })
-				.nonempty("Join date is required"),
-			department: departmentSchema.refine(val => DEPARTMENTS.includes(val), {
-				message: `Department must be one of: ${DEPARTMENTS.join(", ")}`,
-			}),
-			email: z
-				.string({ required_error: "Email is required" })
-				.nonempty("Email is required")
-				.email("Invalid email address"),
-		})["~standard"].validate,
+		validate: z
+			.object({
+				empName: z
+					.string({ required_error: "Name is required" })
+					.nonempty("Name is required"),
+				position: z.string({ required_error: "Age is required" }),
+				hireDate: z.union([
+					z.date(),
+					z
+						.string({ required_error: "Join date is required" })
+						.nonempty("Join date is required")
+						.transform(str => new Date(str)),
+				]),
+				department: departmentSchema.refine(val => DEPARTMENTS.includes(val), {
+					message: `Department must be one of: ${DEPARTMENTS.join(", ")}`,
+				}),
+				email: z
+					.string({ required_error: "Email is required" })
+					.nonempty("Email is required")
+					.email("Invalid email address"),
+			})
+			.passthrough()["~standard"].validate,
 	};
 
 	return {

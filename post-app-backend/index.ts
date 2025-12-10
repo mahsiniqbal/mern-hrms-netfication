@@ -1,10 +1,10 @@
-// backend/index.ts
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
 
 import employeeRoutes from "./routes/employees"; // no need for .ts extension
+import attendanceRoutes from "./routes/attendance";
 
 const app = express();
 
@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/api/employees", employeeRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 // MongoDB Connection
 mongoose

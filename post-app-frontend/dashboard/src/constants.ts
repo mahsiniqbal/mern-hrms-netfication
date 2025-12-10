@@ -13,6 +13,15 @@ export const DEPARTMENTS = [
 	"Operations",
 	"Business Development",
 ] as const;
+
+export const ATTENDANCE_STATUS = [
+	"Present",
+	"Absent",
+	"Half-Day",
+	"Leave",
+	"Holiday",
+] as const;
+
 export const signInProviders = [
 	{ id: "github", name: "GitHub" },
 	{ id: "google", name: "Google" },
