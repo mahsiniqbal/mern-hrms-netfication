@@ -33,18 +33,37 @@ import {
 	fetchAttendanceStats,
 	fetchAttendanceTrends,
 } from "../utils/api/services/attendance";
-import { IAttendanceStats, IAttendanceTrend } from "../utils/api/types";
+import {
+	fetchProjectStats,
+	fetchProjectTrends,
+	fetchEmployeeWorkRate,
+} from "../utils/api/services/projects";
+import {
+	IAttendanceStats,
+	IAttendanceTrend,
+	IProjectStats,
+	IProjectTrend,
+	IEmployeeWorkRate,
+} from "../utils/api/types";
+import { useProjectsServices } from "../hooks/projects/useProjectsServices";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const DashboardPage = () => {
 	const { employees } = useEmployeesServices();
+	const { projects } = useProjectsServices();
 	const [selectedEmployee, setSelectedEmployee] = useState<number | "all">(
 		"all"
 	);
+	const [selectedProject, setSelectedProject] = useState<number | "all">("all");
 	const [period, setPeriod] = useState<"week" | "month" | "year">("month");
 	const [stats, setStats] = useState<IAttendanceStats[]>([]);
 	const [trends, setTrends] = useState<IAttendanceTrend[]>([]);
+	const [projectStats, setProjectStats] = useState<IProjectStats[]>([]);
+	const [projectTrends, setProjectTrends] = useState<IProjectTrend[]>([]);
+	const [employeeWorkRate, setEmployeeWorkRate] = useState<IEmployeeWorkRate[]>(
+		[]
+	);
 	const [loading, setLoading] = useState(false);
 
 	const currentDate = new Date();
@@ -53,7 +72,8 @@ const DashboardPage = () => {
 
 	useEffect(() => {
 		loadAttendanceData();
-	}, [selectedEmployee, period, year, month]);
+		loadProjectData();
+	}, [selectedEmployee, selectedProject, period, year, month]);
 
 	const loadAttendanceData = async () => {
 		setLoading(true);
@@ -74,6 +94,32 @@ const DashboardPage = () => {
 			setTrends(trendsData);
 		} catch (error) {
 			console.error("Failed to load attendance data:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const loadProjectData = async () => {
+		setLoading(true);
+		try {
+			const params = {
+				projectId: selectedProject !== "all" ? selectedProject : undefined,
+				period,
+				year,
+				month,
+			};
+
+			const [statsData, trendsData, workRateData] = await Promise.all([
+				fetchProjectStats(params),
+				fetchProjectTrends(params),
+				fetchEmployeeWorkRate(params),
+			]);
+
+			setProjectStats(statsData);
+			setProjectTrends(trendsData);
+			setEmployeeWorkRate(workRateData);
+		} catch (error) {
+			console.error("Failed to load project data:", error);
 		} finally {
 			setLoading(false);
 		}
@@ -173,6 +219,40 @@ const DashboardPage = () => {
 			{ name: "Leave", value: aggregated.leave, fill: "#0088FE" },
 			{ name: "Half-Day", value: aggregated.halfDay, fill: "#FFBB28" },
 		];
+	};
+
+	// Format project trends data for charts
+	const formatProjectTrendsData = () => {
+		return projectTrends.map(trend => {
+			let label = "";
+			if (period === "year") {
+				const monthNames = [
+					"Jan",
+					"Feb",
+					"Mar",
+					"Apr",
+					"May",
+					"Jun",
+					"Jul",
+					"Aug",
+					"Sep",
+					"Oct",
+					"Nov",
+					"Dec",
+				];
+				label = monthNames[trend._id - 1];
+			} else if (period === "month") {
+				label = `Day ${trend._id}`;
+			} else {
+				const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+				label = dayNames[trend._id - 1];
+			}
+
+			return {
+				name: label,
+				Hours: trend.totalHours,
+			};
+		});
 	};
 
 	return (
@@ -452,18 +532,30 @@ const DashboardPage = () => {
 				{/* Bar Chart - Late/Absent/Leave Summary */}
 				<Card>
 					<CardContent>
-						<Typography variant="h6" gutterBottom>
+						<Typography
+							variant="h6"
+							gutterBottom
+						>
 							Late Arrivals, Absences & Leaves Summary
 						</Typography>
-						<ResponsiveContainer width="100%" height={300}>
+						<ResponsiveContainer
+							width="100%"
+							height={300}
+						>
 							<BarChart data={formatSummaryData()}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis dataKey="name" />
 								<YAxis />
 								<Tooltip />
-								<Bar dataKey="value" fill="#8884d8">
+								<Bar
+									dataKey="value"
+									fill="#8884d8"
+								>
 									{formatSummaryData().map((entry, index) => (
-										<Cell key={`cell-${index}`} fill={entry.fill} />
+										<Cell
+											key={`cell-${index}`}
+											fill={entry.fill}
+										/>
 									))}
 								</Bar>
 							</BarChart>
@@ -566,6 +658,228 @@ const DashboardPage = () => {
 						</CardContent>
 					</Card>
 				)}
+
+				{/* Projects Section */}
+				<Box sx={{ mt: 5 }}>
+					<Typography
+						variant="h5"
+						gutterBottom
+						sx={{ mb: 3 }}
+					>
+						Project Management
+					</Typography>
+
+					{/* Project Filters */}
+					<Paper sx={{ p: 2, mb: 3 }}>
+						<Stack
+							direction={{ xs: "column", md: "row" }}
+							spacing={2}
+						>
+							<Box sx={{ minWidth: { xs: "100%", md: 250 } }}>
+								<FormControl fullWidth>
+									<InputLabel>Project</InputLabel>
+									<Select
+										value={selectedProject}
+										onChange={e =>
+											setSelectedProject(e.target.value as number | "all")
+										}
+										label="Project"
+									>
+										<MenuItem value="all">All Projects</MenuItem>
+										{projects.map(proj => (
+											<MenuItem
+												key={proj.id}
+												value={proj.id}
+											>
+												{proj.projectName}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Box>
+						</Stack>
+					</Paper>
+
+					{/* Project Stats Cards */}
+					<Stack
+						direction={{ xs: "column", md: "row" }}
+						spacing={3}
+						sx={{ mb: 3 }}
+					>
+						<Card sx={{ flex: 1 }}>
+							<CardContent>
+								<Typography
+									color="textSecondary"
+									gutterBottom
+								>
+									Total Projects
+								</Typography>
+								<Typography variant="h4">{projectStats.length}</Typography>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+								>
+									Active projects
+								</Typography>
+							</CardContent>
+						</Card>
+
+						<Card sx={{ flex: 1 }}>
+							<CardContent>
+								<Typography
+									color="textSecondary"
+									gutterBottom
+								>
+									Total Hours Worked
+								</Typography>
+								<Typography variant="h4">
+									{projectStats
+										.reduce((acc, proj) => acc + proj.totalHoursWorked, 0)
+										.toFixed(1)}
+								</Typography>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+								>
+									Across all projects
+								</Typography>
+							</CardContent>
+						</Card>
+
+						<Card sx={{ flex: 1 }}>
+							<CardContent>
+								<Typography
+									color="textSecondary"
+									gutterBottom
+								>
+									Avg Progress
+								</Typography>
+								<Typography variant="h4">
+									{projectStats.length > 0
+										? (
+												projectStats.reduce(
+													(acc, proj) => acc + (proj.progress || 0),
+													0
+												) / projectStats.length
+											).toFixed(1)
+										: "0"}
+									%
+								</Typography>
+								<Typography
+									variant="body2"
+									color="textSecondary"
+								>
+									Overall completion
+								</Typography>
+							</CardContent>
+						</Card>
+					</Stack>
+
+					{/* Project Charts */}
+					<Stack spacing={3}>
+						{/* Line Chart - Project Hours Trends */}
+						<Card>
+							<CardContent>
+								<Typography
+									variant="h6"
+									gutterBottom
+								>
+									Project Work Hours Over Time
+								</Typography>
+								<ResponsiveContainer
+									width="100%"
+									height={300}
+								>
+									<LineChart data={formatProjectTrendsData()}>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="name" />
+										<YAxis />
+										<Tooltip />
+										<Legend />
+										<Line
+											type="monotone"
+											dataKey="Hours"
+											stroke="#8884D8"
+											strokeWidth={2}
+										/>
+									</LineChart>
+								</ResponsiveContainer>
+							</CardContent>
+						</Card>
+
+						{/* Bar Chart - Employee Work Rate */}
+						{employeeWorkRate.length > 0 && (
+							<Card>
+								<CardContent>
+									<Typography
+										variant="h6"
+										gutterBottom
+									>
+										Employee Work Rate (%)
+									</Typography>
+									<ResponsiveContainer
+										width="100%"
+										height={300}
+									>
+										<BarChart data={employeeWorkRate}>
+											<CartesianGrid strokeDasharray="3 3" />
+											<XAxis dataKey="employeeName" />
+											<YAxis />
+											<Tooltip />
+											<Legend />
+											<Bar
+												dataKey="workRatePercentage"
+												fill="#8884D8"
+												name="Work Rate %"
+											/>
+											<Bar
+												dataKey="totalHours"
+												fill="#82CA9D"
+												name="Total Hours"
+											/>
+										</BarChart>
+									</ResponsiveContainer>
+								</CardContent>
+							</Card>
+						)}
+
+						{/* Bar Chart - Project Status Distribution */}
+						{selectedProject === "all" && projectStats.length > 0 && (
+							<Card>
+								<CardContent>
+									<Typography
+										variant="h6"
+										gutterBottom
+									>
+										Project Hours by Project
+									</Typography>
+									<ResponsiveContainer
+										width="100%"
+										height={300}
+									>
+										<BarChart data={projectStats}>
+											<CartesianGrid strokeDasharray="3 3" />
+											<XAxis dataKey="projectName" />
+											<YAxis />
+											<Tooltip />
+											<Legend />
+											<Bar
+												dataKey="totalHoursWorked"
+												fill="#8884D8"
+												name="Hours Worked"
+											/>
+											<Bar
+												dataKey="totalHoursAllocated"
+												fill="#82CA9D"
+												name="Hours Allocated"
+											/>
+										</BarChart>
+									</ResponsiveContainer>
+								</CardContent>
+							</Card>
+						)}
+					</Stack>
+				</Box>
 			</Stack>
 		</Box>
 	);

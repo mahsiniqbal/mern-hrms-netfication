@@ -1,6 +1,7 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import FolderIcon from "@mui/icons-material/Folder";
 import { Outlet } from "react-router";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
 import type { Branding, Navigation } from "@toolpad/core/AppProvider";
@@ -8,7 +9,7 @@ import type { Branding, Navigation } from "@toolpad/core/AppProvider";
 const NAVIGATION: Navigation = [
 	{
 		kind: "header",
-		title: "Main items",
+		title: "",
 	},
 	{
 		title: "Dashboard",
@@ -25,6 +26,12 @@ const NAVIGATION: Navigation = [
 		title: "Attendance",
 		icon: <CalendarMonthIcon />,
 		pattern: "attendance{/:attendanceId}*",
+	},
+	{
+		segment: "projects",
+		title: "Projects",
+		icon: <FolderIcon />,
+		pattern: "projects{/:projectId}*",
 	},
 ];
 

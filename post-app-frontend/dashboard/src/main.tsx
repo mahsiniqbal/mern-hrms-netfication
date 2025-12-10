@@ -6,6 +6,7 @@ import Layout from "./layouts/dashboard";
 import DashboardPage from "./pages/Dashboard";
 import EmployeesCrudPage from "./pages/Employees";
 import AttendanceCrudPage from "./pages/Attendance";
+import ProjectsCrudPage from "./pages/Projects";
 
 export const router = createBrowserRouter([
 	{
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
 					{
 						path: "attendance/:attendanceId?/*",
 						Component: AttendanceCrudPage,
+					},
+					{
+						path: "projects/:projectId?/*",
+						Component: ProjectsCrudPage,
 					},
 				],
 			},

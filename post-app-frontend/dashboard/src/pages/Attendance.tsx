@@ -22,12 +22,15 @@ const AttendanceCrudPage = () => {
 			initialPageSize={10}
 			defaultValues={{ itemCount: 1 }}
 			pageTitles={{
-				show: `Attendance Record #${attendanceId}`,
+				show: `Attendance Record : ${attendanceRecord?.employeeName} |  ${
+					attendanceRecord &&
+					new Date(attendanceRecord.date).toLocaleDateString()
+				}`,
 				create: "New Attendance Record",
 				edit: attendanceRecord
 					? `${attendanceRecord.employeeName} - ${new Date(
 							attendanceRecord.date
-					  ).toLocaleDateString()}`
+						).toLocaleDateString()}`
 					: "Edit Attendance",
 			}}
 		/>

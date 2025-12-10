@@ -22,6 +22,16 @@ export const ATTENDANCE_STATUS = [
 	"Holiday",
 ] as const;
 
+export const PROJECT_STATUS = [
+	"Planning",
+	"Active",
+	"On Hold",
+	"Completed",
+	"Cancelled",
+] as const;
+
+export const PROJECT_PRIORITY = ["Low", "Medium", "High", "Critical"] as const;
+
 export const signInProviders = [
 	{ id: "github", name: "GitHub" },
 	{ id: "google", name: "Google" },
