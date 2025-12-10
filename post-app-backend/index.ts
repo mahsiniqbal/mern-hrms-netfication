@@ -5,6 +5,8 @@ import bodyParser from "body-parser";
 
 import employeeRoutes from "./routes/employees"; // no need for .ts extension
 import attendanceRoutes from "./routes/attendance";
+import projectRoutes from "./routes/projects";
+import projectWorkLogRoutes from "./routes/projectWorkLogs";
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use(bodyParser.json());
 // Routes
 app.use("/api/employees", employeeRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/project-work-logs", projectWorkLogRoutes);
 
 // MongoDB Connection
 mongoose
