@@ -11,11 +11,14 @@ import {
 	Typography,
 	Paper,
 	Autocomplete,
+	InputAdornment,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Search as SearchIcon } from "@mui/icons-material";
 import { useAttendance } from "../hooks/attendance/useAttendance";
 import { ATTENDANCE_STATUS } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const AttendancePage = () => {
 	const {
@@ -31,14 +34,32 @@ const AttendancePage = () => {
 		handleSave,
 		validationErrors,
 		columns,
-		paginationModel,
-		setPaginationModel,
 		openDialog,
 		setOpenDialog,
 		handleEmployeeChange,
 		handleCancelDelete,
 		handleConfirmDelete,
 	} = useAttendance();
+
+	const navigate = useNavigate();
+	const [searchText, setSearchText] = useState("");
+
+	const filteredAttendance = attendance.filter((record) => {
+		const searchLower = searchText.toLowerCase();
+		return (
+			record.id.toString().includes(searchLower) ||
+			record.employeeName.toLowerCase().includes(searchLower) ||
+			record.status.toLowerCase().includes(searchLower) ||
+			new Date(record.date).toLocaleDateString().toLowerCase().includes(searchLower) ||
+			record.checkInTime?.toLowerCase().includes(searchLower) ||
+			record.checkOutTime?.toLowerCase().includes(searchLower) ||
+			record.notes?.toLowerCase().includes(searchLower)
+		);
+	});
+
+	const handleRowClick = (params: any) => {
+		navigate(`/attendance/${params.id}`);
+	};
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
@@ -61,6 +82,7 @@ const AttendancePage = () => {
 					>
 						Attendance Management
 					</Typography>
+
 					<Button
 						variant="contained"
 						startIcon={<AddIcon />}
@@ -70,24 +92,39 @@ const AttendancePage = () => {
 						Add Attendance
 					</Button>
 				</Box>
+
+				<Box sx={{ px: 2, pb: 2 }}>
+					<TextField
+						fullWidth
+						variant="outlined"
+						placeholder="Search attendance records..."
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							),
+						}}
+						sx={{ mb: 2 }}
+					/>
+				</Box>
+
 				<Box sx={{ height: "70vh", flexGrow: 1, px: 2, pb: 2 }}>
 					<DataGrid
-						rows={attendance}
+						rows={filteredAttendance}
 						columns={columns}
 						loading={loading}
-						hideFooter
 						disableRowSelectionOnClick
-						slots={{ toolbar: GridToolbar }}
-						slotProps={{
-							toolbar: {
-								showQuickFilter: true,
-								quickFilterProps: { debounceMs: 500 },
-							},
-						}}
+						onRowClick={handleRowClick}
 						sx={{
 							border: "none",
 							"& .MuiDataGrid-cell:focus": {
 								outline: "none",
+							},
+							"& .MuiDataGrid-row": {
+								cursor: "pointer",
 							},
 						}}
 					/>

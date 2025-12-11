@@ -1,4 +1,4 @@
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import {
 	Dialog,
 	DialogTitle,
@@ -10,11 +10,14 @@ import {
 	Box,
 	Typography,
 	Paper,
+	InputAdornment,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Search as SearchIcon } from "@mui/icons-material";
 import { useEmployees } from "../hooks/employees/useEmployees";
 import { DEPARTMENTS } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const EmployeesPage = () => {
 	const {
@@ -36,6 +39,24 @@ const EmployeesPage = () => {
 		paginationModel,
 		setPaginationModel,
 	} = useEmployees();
+
+	const navigate = useNavigate();
+	const [searchText, setSearchText] = useState("");
+
+	const filteredEmployees = employees.filter((employee) => {
+		const searchLower = searchText.toLowerCase();
+		return (
+			employee.id.toString().includes(searchLower) ||
+			employee.empName.toLowerCase().includes(searchLower) ||
+			employee.email.toLowerCase().includes(searchLower) ||
+			employee.position.toLowerCase().includes(searchLower) ||
+			employee.department.toLowerCase().includes(searchLower)
+		);
+	});
+
+	const handleRowClick = (params: any) => {
+		navigate(`/employees/${params.id}`);
+	};
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
@@ -67,24 +88,40 @@ const EmployeesPage = () => {
 						Add Employee
 					</Button>
 				</Box>
+
+				<Box sx={{ px: 2, pb: 2 }}>
+					<TextField
+						fullWidth
+						variant="outlined"
+						placeholder="Search employees..."
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							),
+						}}
+						sx={{ mb: 2 }}
+					/>
+				</Box>
+
 				<Box sx={{ flexGrow: 1, px: 2, pb: 2 }}>
 					<DataGrid
-						rows={employees}
+						rows={filteredEmployees}
 						columns={columns}
 						loading={loading}
 						hideFooter
 						disableRowSelectionOnClick
-						slots={{ toolbar: GridToolbar }}
-						slotProps={{
-							toolbar: {
-								showQuickFilter: true,
-								quickFilterProps: { debounceMs: 500 },
-							},
-						}}
+						onRowClick={handleRowClick}
 						sx={{
 							border: "none",
 							"& .MuiDataGrid-cell:focus": {
 								outline: "none",
+							},
+							"& .MuiDataGrid-row": {
+								cursor: "pointer",
 							},
 						}}
 					/>

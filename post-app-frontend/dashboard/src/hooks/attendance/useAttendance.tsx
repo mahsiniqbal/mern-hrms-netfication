@@ -48,10 +48,6 @@ export const useAttendance = () => {
 	const [validationErrors, setValidationErrors] = useState<
 		Record<string, string>
 	>({});
-	const [paginationModel, setPaginationModel] = useState({
-		page: 0,
-		pageSize: 10,
-	});
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -395,8 +391,6 @@ export const useAttendance = () => {
 		formData,
 		setFormData,
 		columns,
-		paginationModel,
-		setPaginationModel,
 		openDialog,
 		setOpenDialog,
 		handleEmployeeChange,

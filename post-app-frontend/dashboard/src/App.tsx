@@ -8,10 +8,6 @@ import type { Branding, Navigation } from "@toolpad/core/AppProvider";
 
 const NAVIGATION: Navigation = [
 	{
-		kind: "header",
-		title: "",
-	},
-	{
 		title: "Dashboard",
 		icon: <DashboardIcon />,
 	},

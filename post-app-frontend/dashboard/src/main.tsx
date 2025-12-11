@@ -7,6 +7,9 @@ import DashboardPage from "./pages/Dashboard";
 import EmployeesCrudPage from "./pages/Employees";
 import AttendanceCrudPage from "./pages/Attendance";
 import ProjectsCrudPage from "./pages/Projects";
+import EmployeeDetail from "./pages/EmployeeDetail";
+import AttendanceDetail from "./pages/AttendanceDetail";
+import ProjectDetail from "./pages/ProjectDetail";
 
 export const router = createBrowserRouter([
 	{
@@ -21,16 +24,28 @@ export const router = createBrowserRouter([
 						Component: DashboardPage,
 					},
 					{
-						path: "employees/:employeeId?/*",
+						path: "employees",
 						Component: EmployeesCrudPage,
 					},
 					{
-						path: "attendance/:attendanceId?/*",
+						path: "employees/:employeeId",
+						Component: EmployeeDetail,
+					},
+					{
+						path: "attendance",
 						Component: AttendanceCrudPage,
 					},
 					{
-						path: "projects/:projectId?/*",
+						path: "attendance/:attendanceId",
+						Component: AttendanceDetail,
+					},
+					{
+						path: "projects",
 						Component: ProjectsCrudPage,
+					},
+					{
+						path: "projects/:projectId",
+						Component: ProjectDetail,
 					},
 				],
 			},

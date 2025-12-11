@@ -1,4 +1,4 @@
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import {
 	Dialog,
 	DialogTitle,
@@ -10,11 +10,14 @@ import {
 	Box,
 	Typography,
 	Paper,
+	InputAdornment,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Search as SearchIcon } from "@mui/icons-material";
 import { useProjects } from "../hooks/projects/useProjects";
 import { PROJECT_STATUS, PROJECT_PRIORITY } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const ProjectsPage = () => {
 	const {
@@ -34,6 +37,27 @@ const ProjectsPage = () => {
 		confirmDialogOpen,
 		deleteTarget,
 	} = useProjects();
+
+	const navigate = useNavigate();
+	const [searchText, setSearchText] = useState("");
+
+	const filteredProjects = projects.filter((project) => {
+		const searchLower = searchText.toLowerCase();
+		return (
+			project.id.toString().includes(searchLower) ||
+			project.projectName.toLowerCase().includes(searchLower) ||
+			project.projectCode.toLowerCase().includes(searchLower) ||
+			project.clientName?.toLowerCase().includes(searchLower) ||
+			project.status.toLowerCase().includes(searchLower) ||
+			project.priority.toLowerCase().includes(searchLower) ||
+			project.projectManager?.toLowerCase().includes(searchLower) ||
+			project.description?.toLowerCase().includes(searchLower)
+		);
+	});
+
+	const handleRowClick = (params: any) => {
+		navigate(`/projects/${params.id}`);
+	};
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
@@ -65,24 +89,40 @@ const ProjectsPage = () => {
 						Add Project
 					</Button>
 				</Box>
+
+				<Box sx={{ px: 2, pb: 2 }}>
+					<TextField
+						fullWidth
+						variant="outlined"
+						placeholder="Search projects..."
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							),
+						}}
+						sx={{ mb: 2 }}
+					/>
+				</Box>
+
 				<Box sx={{ flexGrow: 1, px: 2, pb: 2 }}>
 					<DataGrid
-						rows={projects}
+						rows={filteredProjects}
 						columns={columns}
 						loading={loading}
 						hideFooter
 						disableRowSelectionOnClick
-						slots={{ toolbar: GridToolbar }}
-						slotProps={{
-							toolbar: {
-								showQuickFilter: true,
-								quickFilterProps: { debounceMs: 500 },
-							},
-						}}
+						onRowClick={handleRowClick}
 						sx={{
 							border: "none",
 							"& .MuiDataGrid-cell:focus": {
 								outline: "none",
+							},
+							"& .MuiDataGrid-row": {
+								cursor: "pointer",
 							},
 						}}
 					/>
