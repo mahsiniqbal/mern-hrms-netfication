@@ -28,7 +28,6 @@ import {
 	Legend,
 	ResponsiveContainer,
 } from "recharts";
-import { useEmployeesServices } from "../hooks/employees/useEmployeesServices";
 import {
 	fetchAttendanceStats,
 	fetchAttendanceTrends,
@@ -46,11 +45,12 @@ import {
 	IEmployeeWorkRate,
 } from "../utils/api/types";
 import { useProjectsServices } from "../hooks/projects/useProjectsServices";
+import { useEmployees } from "../hooks/employees/useEmployees";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const DashboardPage = () => {
-	const { employees } = useEmployeesServices();
+	const { employees } = useEmployees();
 	const { projects } = useProjectsServices();
 	const [selectedEmployee, setSelectedEmployee] = useState<number | "all">(
 		"all"

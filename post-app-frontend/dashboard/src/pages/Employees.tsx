@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
 	Dialog,
@@ -33,15 +32,10 @@ const EmployeesPage = () => {
 		handleConfirmDelete,
 		handleCancelDelete,
 		deleteTarget,
+		validationErrors,
+		paginationModel,
+		setPaginationModel,
 	} = useEmployees();
-
-	const [validationErrors, setValidationErrors] = useState<
-		Record<string, string>
-	>({});
-	const [paginationModel, setPaginationModel] = useState({
-		page: 0,
-		pageSize: 10,
-	});
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
@@ -78,9 +72,7 @@ const EmployeesPage = () => {
 						rows={employees}
 						columns={columns}
 						loading={loading}
-						pageSizeOptions={[5, 10, 25, 50]}
-						paginationModel={paginationModel}
-						onPaginationModelChange={setPaginationModel}
+						hideFooter
 						disableRowSelectionOnClick
 						slots={{ toolbar: GridToolbar }}
 						slotProps={{
@@ -100,99 +92,104 @@ const EmployeesPage = () => {
 			</Paper>
 
 			{/* Edit/Add Dialog */}
-			<Dialog
-				open={openDialog}
-				onClose={() => setOpenDialog(false)}
-				maxWidth="sm"
-				fullWidth
-			>
-				<DialogTitle>
-					{editMode ? "Edit Employee" : "Add New Employee"}
-				</DialogTitle>
-				<DialogContent>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
-						<TextField
-							label="Name"
-							fullWidth
-							value={formData.empName}
-							onChange={e => handleInputChange("empName", e.target.value)}
-							error={!!validationErrors.empName}
-							helperText={validationErrors.empName}
-							required
-						/>
-						<TextField
-							label="Email"
-							type="email"
-							fullWidth
-							value={formData.email}
-							onChange={e => handleInputChange("email", e.target.value)}
-							error={!!validationErrors.email}
-							helperText={validationErrors.email}
-							required
-						/>
-						<TextField
-							label="Position"
-							fullWidth
-							value={formData.position}
-							onChange={e => handleInputChange("position", e.target.value)}
-							error={!!validationErrors.position}
-							helperText={validationErrors.position}
-							required
-						/>
-						<TextField
-							label="Department"
-							select
-							fullWidth
-							value={formData.department}
-							onChange={e => handleInputChange("department", e.target.value)}
-							error={!!validationErrors.department}
-							helperText={validationErrors.department}
-							required
+			{openDialog && (
+				<Dialog
+					open={openDialog}
+					onClose={() => setOpenDialog(false)}
+					maxWidth="sm"
+					fullWidth
+				>
+					<DialogTitle>
+						{editMode ? "Edit Employee" : "Add New Employee"}
+					</DialogTitle>
+					<DialogContent>
+						<Box
+							sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
 						>
-							{DEPARTMENTS.map(dept => (
-								<MenuItem
-									key={dept}
-									value={dept}
-								>
-									{dept}
-								</MenuItem>
-							))}
-						</TextField>
-						<TextField
-							label="Hire Date"
-							type="date"
-							fullWidth
-							value={formData.hireDate}
-							onChange={e => handleInputChange("hireDate", e.target.value)}
-							error={!!validationErrors.hireDate}
-							helperText={validationErrors.hireDate}
-							required
-							InputLabelProps={{ shrink: true }}
-						/>
-					</Box>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-					<Button
-						onClick={handleSave}
-						variant="contained"
-					>
-						{editMode ? "Update" : "Create"}
-					</Button>
-				</DialogActions>
-			</Dialog>
+							<TextField
+								label="Name"
+								fullWidth
+								value={formData.empName}
+								onChange={e => handleInputChange("empName", e.target.value)}
+								error={!!validationErrors.empName}
+								helperText={validationErrors.empName}
+								required
+							/>
+							<TextField
+								label="Email"
+								type="email"
+								fullWidth
+								value={formData.email}
+								onChange={e => handleInputChange("email", e.target.value)}
+								error={!!validationErrors.email}
+								helperText={validationErrors.email}
+								required
+							/>
+							<TextField
+								label="Position"
+								fullWidth
+								value={formData.position}
+								onChange={e => handleInputChange("position", e.target.value)}
+								error={!!validationErrors.position}
+								helperText={validationErrors.position}
+								required
+							/>
+							<TextField
+								label="Department"
+								select
+								fullWidth
+								value={formData.department}
+								onChange={e => handleInputChange("department", e.target.value)}
+								error={!!validationErrors.department}
+								helperText={validationErrors.department}
+								required
+							>
+								{DEPARTMENTS.map(dept => (
+									<MenuItem
+										key={dept}
+										value={dept}
+									>
+										{dept}
+									</MenuItem>
+								))}
+							</TextField>
+							<TextField
+								label="Hire Date"
+								type="date"
+								fullWidth
+								value={formData.hireDate}
+								onChange={e => handleInputChange("hireDate", e.target.value)}
+								error={!!validationErrors.hireDate}
+								helperText={validationErrors.hireDate}
+								required
+								InputLabelProps={{ shrink: true }}
+							/>
+						</Box>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+						<Button
+							onClick={handleSave}
+							variant="contained"
+						>
+							{editMode ? "Update" : "Create"}
+						</Button>
+					</DialogActions>
+				</Dialog>
+			)}
 
-			{/* Confirm Delete Dialog */}
-			<ConfirmDialog
-				open={confirmDialogOpen}
-				onClose={handleCancelDelete}
-				onConfirm={handleConfirmDelete}
-				title="Delete Employee"
-				message={`Are you sure you want to delete ${deleteTarget?.empName}? This action cannot be undone.`}
-				confirmText="Delete"
-				cancelText="Cancel"
-				confirmColor="error"
-			/>
+			{confirmDialogOpen && (
+				<ConfirmDialog
+					open={confirmDialogOpen}
+					onClose={handleCancelDelete}
+					onConfirm={handleConfirmDelete}
+					title="Delete Employee"
+					message={`Are you sure you want to delete ${deleteTarget?.empName}? This action cannot be undone.`}
+					confirmText="Delete"
+					cancelText="Cancel"
+					confirmColor="error"
+				/>
+			)}
 		</Box>
 	);
 };

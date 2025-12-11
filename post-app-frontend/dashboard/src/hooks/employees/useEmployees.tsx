@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { IEmployee, IAddEmployeeParams } from "../../utils/api/types";
 import {
 	addEmployee,
@@ -9,7 +9,11 @@ import {
 import { EmployeeFormData } from "../../types/types";
 import * as yup from "yup";
 import { employeeValidationSchema } from "../../forms/validationSchemas";
-import { GridColDef, GridActionsCellItem, GridRowParams } from "@mui/x-data-grid";
+import {
+	GridColDef,
+	GridActionsCellItem,
+	GridRowParams,
+} from "@mui/x-data-grid";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 export const useEmployees = () => {
@@ -302,5 +306,8 @@ export const useEmployees = () => {
 		handleConfirmDelete,
 		handleCancelDelete,
 		deleteTarget,
+		validationErrors,
+		paginationModel,
+		setPaginationModel,
 	};
 };
