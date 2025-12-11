@@ -261,7 +261,7 @@ const DashboardPage = () => {
 				variant="h4"
 				gutterBottom
 			>
-				Dashboard
+				Attendance & Projects Dashboard
 			</Typography>
 
 			{/* Filters */}
