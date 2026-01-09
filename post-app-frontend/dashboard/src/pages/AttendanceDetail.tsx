@@ -12,7 +12,6 @@ import {
 	IconButton,
 	TextField,
 	MenuItem,
-	Autocomplete,
 } from "@mui/material";
 import {
 	ArrowBack as ArrowBackIcon,
@@ -42,7 +41,9 @@ const AttendanceDetail = () => {
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 	const [editMode, setEditMode] = useState(false);
 	const [formData, setFormData] = useState<any>({});
-	const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+	const [validationErrors, setValidationErrors] = useState<
+		Record<string, string>
+	>({});
 
 	useEffect(() => {
 		const loadData = async () => {
@@ -54,7 +55,9 @@ const AttendanceDetail = () => {
 					fetchAttendance(),
 					fetchEmployees(),
 				]);
-				const record = attendanceData.find((a) => a.id.toString() === attendanceId);
+				const record = attendanceData.find(
+					a => a.id.toString() === attendanceId
+				);
 				setAttendance(record || null);
 				setEmployees(employeesData);
 
@@ -117,7 +120,9 @@ const AttendanceDetail = () => {
 			const dataToValidate = {
 				...formData,
 				date: new Date(formData.date),
-				workHours: formData.workHours ? parseFloat(formData.workHours) : undefined,
+				workHours: formData.workHours
+					? parseFloat(formData.workHours)
+					: undefined,
 			};
 
 			await attendanceValidationSchema.validate(dataToValidate, {
@@ -133,10 +138,17 @@ const AttendanceDetail = () => {
 				employeeId: formData.employeeId,
 				employeeName: formData.employeeName,
 				date: new Date(formData.date),
-				status: formData.status as "Present" | "Absent" | "Half-Day" | "Leave" | "Holiday",
+				status: formData.status as
+					| "Present"
+					| "Absent"
+					| "Half-Day"
+					| "Leave"
+					| "Holiday",
 				checkInTime: formData.checkInTime || undefined,
 				checkOutTime: formData.checkOutTime || undefined,
-				workHours: formData.workHours ? parseFloat(formData.workHours) : undefined,
+				workHours: formData.workHours
+					? parseFloat(formData.workHours)
+					: undefined,
 				isLate: formData.isLate,
 				notes: formData.notes || undefined,
 			};
@@ -150,7 +162,7 @@ const AttendanceDetail = () => {
 			if (error instanceof yup.ValidationError) {
 				// Convert yup errors to object format
 				const errors: Record<string, string> = {};
-				error.inner.forEach((err) => {
+				error.inner.forEach(err => {
 					if (err.path) {
 						errors[err.path] = err.message;
 					}
@@ -188,7 +200,7 @@ const AttendanceDetail = () => {
 		setFormData((prev: any) => ({ ...prev, [field]: value }));
 		// Clear validation error for this field
 		if (validationErrors[field]) {
-			setValidationErrors((prev) => {
+			setValidationErrors(prev => {
 				const newErrors = { ...prev };
 				delete newErrors[field];
 				return newErrors;
@@ -199,7 +211,7 @@ const AttendanceDetail = () => {
 	const handleEmployeeChange = (employeeId: number, employeeName: string) => {
 		setFormData((prev: any) => ({ ...prev, employeeId, employeeName }));
 		if (validationErrors.employeeId || validationErrors.employeeName) {
-			setValidationErrors((prev) => {
+			setValidationErrors(prev => {
 				const newErrors = { ...prev };
 				delete newErrors.employeeId;
 				delete newErrors.employeeName;
@@ -228,7 +240,11 @@ const AttendanceDetail = () => {
 			<Box sx={{ p: 3 }}>
 				<Paper sx={{ p: 3 }}>
 					<Typography variant="h6">Attendance record not found</Typography>
-					<Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
+					<Button
+						startIcon={<ArrowBackIcon />}
+						onClick={handleBack}
+						sx={{ mt: 2 }}
+					>
 						Back to List
 					</Button>
 				</Paper>
@@ -252,9 +268,15 @@ const AttendanceDetail = () => {
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
-			<Paper elevation={2} sx={{ p: 3 }}>
+			<Paper
+				elevation={2}
+				sx={{ p: 3 }}
+			>
 				<Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-					<IconButton onClick={handleBack} sx={{ mr: 2 }}>
+					<IconButton
+						onClick={handleBack}
+						sx={{ mr: 2 }}
+					>
 						<ArrowBackIcon />
 					</IconButton>
 					<Typography
@@ -310,8 +332,13 @@ const AttendanceDetail = () => {
 				<Divider sx={{ mb: 3 }} />
 
 				{editMode ? (
-					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
+					<Grid
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+						container
+						spacing={2}
+					>
+						<Grid>
 							<TextField
 								label="Employee"
 								fullWidth
@@ -320,44 +347,47 @@ const AttendanceDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Date"
 								type="date"
 								fullWidth
 								value={formData.date}
-								onChange={(e) => handleInputChange("date", e.target.value)}
+								onChange={e => handleInputChange("date", e.target.value)}
 								error={!!validationErrors.date}
 								helperText={validationErrors.date}
 								InputLabelProps={{ shrink: true }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Status"
 								select
 								fullWidth
 								value={formData.status}
-								onChange={(e) => handleInputChange("status", e.target.value)}
+								onChange={e => handleInputChange("status", e.target.value)}
 								error={!!validationErrors.status}
 								helperText={validationErrors.status}
 							>
-								{ATTENDANCE_STATUS.map((status) => (
-									<MenuItem key={status} value={status}>
+								{ATTENDANCE_STATUS.map(status => (
+									<MenuItem
+										key={status}
+										value={status}
+									>
 										{status}
 									</MenuItem>
 								))}
 							</TextField>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Punctuality"
 								select
 								fullWidth
 								value={formData.isLate ? "late" : "ontime"}
-								onChange={(e) =>
+								onChange={e =>
 									handleInputChange("isLate", e.target.value === "late")
 								}
 							>
@@ -366,46 +396,48 @@ const AttendanceDetail = () => {
 							</TextField>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Check In Time"
 								type="time"
 								fullWidth
 								value={formData.checkInTime}
-								onChange={(e) => handleInputChange("checkInTime", e.target.value)}
+								onChange={e => handleInputChange("checkInTime", e.target.value)}
 								error={!!validationErrors.checkInTime}
 								helperText={validationErrors.checkInTime}
 								InputLabelProps={{ shrink: true }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Check Out Time"
 								type="time"
 								fullWidth
 								value={formData.checkOutTime}
-								onChange={(e) => handleInputChange("checkOutTime", e.target.value)}
+								onChange={e =>
+									handleInputChange("checkOutTime", e.target.value)
+								}
 								error={!!validationErrors.checkOutTime}
 								helperText={validationErrors.checkOutTime}
 								InputLabelProps={{ shrink: true }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Work Hours"
 								type="number"
 								fullWidth
 								value={formData.workHours}
-								onChange={(e) => handleInputChange("workHours", e.target.value)}
+								onChange={e => handleInputChange("workHours", e.target.value)}
 								error={!!validationErrors.workHours}
 								helperText={validationErrors.workHours}
 								inputProps={{ step: 0.5, min: 0, max: 24 }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="ID"
 								fullWidth
@@ -414,110 +446,173 @@ const AttendanceDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12}>
+						<Grid>
 							<TextField
 								label="Notes"
 								fullWidth
 								multiline
 								rows={3}
 								value={formData.notes}
-								onChange={(e) => handleInputChange("notes", e.target.value)}
+								onChange={e => handleInputChange("notes", e.target.value)}
 								error={!!validationErrors.notes}
 								helperText={validationErrors.notes}
 							/>
 						</Grid>
 					</Grid>
 				) : (
-					<Grid container spacing={3}>
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+					<Grid
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+						container
+						spacing={3}
+					>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								ID
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{attendance.id}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Employee
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{attendance.employeeName} (ID: {attendance.employeeId})
-						</Typography>
-					</Grid>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Employee
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{attendance.employeeName} (ID: {attendance.employeeId})
+							</Typography>
+						</Grid>
 
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Date
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{new Date(attendance.date).toLocaleDateString()}
-						</Typography>
-					</Grid>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Date
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{new Date(attendance.date).toLocaleDateString()}
+							</Typography>
+						</Grid>
 
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Status
-						</Typography>
-						<Chip
-							label={attendance.status}
-							color={getStatusColor(attendance.status)}
-							sx={{ fontWeight: 600 }}
-						/>
-					</Grid>
-
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Punctuality
-						</Typography>
-						{attendance.status === "Present" || attendance.status === "Half-Day" ? (
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Status
+							</Typography>
 							<Chip
-								label={attendance.isLate ? "Late" : "On Time"}
-								color={attendance.isLate ? "error" : "success"}
+								label={attendance.status}
+								color={getStatusColor(attendance.status)}
 								sx={{ fontWeight: 600 }}
 							/>
-						) : (
-							<Typography variant="body1">N/A</Typography>
-						)}
-					</Grid>
+						</Grid>
 
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Check In Time
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{attendance.checkInTime || "N/A"}
-						</Typography>
-					</Grid>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Punctuality
+							</Typography>
+							{attendance.status === "Present" ||
+							attendance.status === "Half-Day" ? (
+								<Chip
+									label={attendance.isLate ? "Late" : "On Time"}
+									color={attendance.isLate ? "error" : "success"}
+									sx={{ fontWeight: 600 }}
+								/>
+							) : (
+								<Typography variant="body1">N/A</Typography>
+							)}
+						</Grid>
 
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Check Out Time
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{attendance.checkOutTime || "N/A"}
-						</Typography>
-					</Grid>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Check In Time
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{attendance.checkInTime || "N/A"}
+							</Typography>
+						</Grid>
 
-					<Grid item xs={12} md={6}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Work Hours
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{attendance.workHours ? `${attendance.workHours}h` : "N/A"}
-						</Typography>
-					</Grid>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Check Out Time
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{attendance.checkOutTime || "N/A"}
+							</Typography>
+						</Grid>
 
-					<Grid item xs={12}>
-						<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-							Notes
-						</Typography>
-						<Typography variant="body1" sx={{ mb: 2 }}>
-							{attendance.notes || "No notes"}
-						</Typography>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Work Hours
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{attendance.workHours ? `${attendance.workHours}h` : "N/A"}
+							</Typography>
+						</Grid>
+
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Notes
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
+								{attendance.notes || "No notes"}
+							</Typography>
+						</Grid>
 					</Grid>
-				</Grid>
 				)}
 			</Paper>
 

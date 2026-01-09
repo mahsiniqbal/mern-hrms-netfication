@@ -23,9 +23,9 @@ import {
 } from "@mui/icons-material";
 import { IProject } from "../utils/api/types";
 import {
-	fetchProjects,
 	deleteProject,
 	updateProject,
+	fetchProject,
 } from "../utils/api/services/projects";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { PROJECT_STATUS, PROJECT_PRIORITY } from "../constants";
@@ -40,7 +40,9 @@ const ProjectDetail = () => {
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 	const [editMode, setEditMode] = useState(false);
 	const [formData, setFormData] = useState<any>({});
-	const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+	const [validationErrors, setValidationErrors] = useState<
+		Record<string, string>
+	>({});
 
 	useEffect(() => {
 		const loadProject = async () => {
@@ -48,27 +50,26 @@ const ProjectDetail = () => {
 
 			try {
 				setLoading(true);
-				const data = await fetchProjects();
-				const record = data.find((p) => p.id.toString() === projectId);
-				setProject(record || null);
+				const project = await fetchProject(projectId);
+				setProject(project);
 
-				if (record) {
+				if (project) {
 					setFormData({
-						projectName: record.projectName,
-						projectCode: record.projectCode,
-						description: record.description || "",
-						clientName: record.clientName || "",
-						startDate: new Date(record.startDate).toISOString().split("T")[0],
-						endDate: record.endDate
-							? new Date(record.endDate).toISOString().split("T")[0]
+						projectName: project.projectName,
+						projectCode: project.projectCode,
+						description: project.description || "",
+						clientName: project.clientName || "",
+						startDate: new Date(project.startDate).toISOString().split("T")[0],
+						endDate: project.endDate
+							? new Date(project.endDate).toISOString().split("T")[0]
 							: "",
-						status: record.status,
-						priority: record.priority,
-						budget: record.budget?.toString() || "",
-						totalHoursAllocated: record.totalHoursAllocated?.toString() || "",
-						teamSize: record.teamSize?.toString() || "",
-						projectManager: record.projectManager || "",
-						progress: record.progress?.toString() || "0",
+						status: project.status,
+						priority: project.priority,
+						budget: project.budget?.toString() || "",
+						totalHoursAllocated: project.totalHoursAllocated?.toString() || "",
+						teamSize: project.teamSize?.toString() || "",
+						projectManager: project.projectManager || "",
+						progress: project.progress?.toString() || "0",
 					});
 				}
 			} catch (error) {
@@ -179,7 +180,7 @@ const ProjectDetail = () => {
 			if (error instanceof yup.ValidationError) {
 				// Convert yup errors to object format
 				const errors: Record<string, string> = {};
-				error.inner.forEach((err) => {
+				error.inner.forEach(err => {
 					if (err.path) {
 						errors[err.path] = err.message;
 					}
@@ -217,7 +218,7 @@ const ProjectDetail = () => {
 		setFormData((prev: any) => ({ ...prev, [field]: value }));
 		// Clear validation error for this field
 		if (validationErrors[field]) {
-			setValidationErrors((prev) => {
+			setValidationErrors(prev => {
 				const newErrors = { ...prev };
 				delete newErrors[field];
 				return newErrors;
@@ -245,7 +246,11 @@ const ProjectDetail = () => {
 			<Box sx={{ p: 3 }}>
 				<Paper sx={{ p: 3 }}>
 					<Typography variant="h6">Project not found</Typography>
-					<Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
+					<Button
+						startIcon={<ArrowBackIcon />}
+						onClick={handleBack}
+						sx={{ mt: 2 }}
+					>
 						Back to List
 					</Button>
 				</Paper>
@@ -279,9 +284,15 @@ const ProjectDetail = () => {
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
-			<Paper elevation={2} sx={{ p: 3 }}>
+			<Paper
+				elevation={2}
+				sx={{ p: 3 }}
+			>
 				<Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-					<IconButton onClick={handleBack} sx={{ mr: 2 }}>
+					<IconButton
+						onClick={handleBack}
+						sx={{ mr: 2 }}
+					>
 						<ArrowBackIcon />
 					</IconButton>
 					<Typography
@@ -337,8 +348,13 @@ const ProjectDetail = () => {
 				<Divider sx={{ mb: 3 }} />
 
 				{editMode ? (
-					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
+					<Grid
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+						container
+						spacing={2}
+					>
+						<Grid>
 							<TextField
 								label="Project Code"
 								fullWidth
@@ -347,7 +363,7 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="ID"
 								fullWidth
@@ -356,98 +372,106 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12}>
+						<Grid>
 							<TextField
 								label="Project Name"
 								fullWidth
 								value={formData.projectName}
-								onChange={(e) => handleInputChange("projectName", e.target.value)}
+								onChange={e => handleInputChange("projectName", e.target.value)}
 								error={!!validationErrors.projectName}
 								helperText={validationErrors.projectName}
 								required
 							/>
 						</Grid>
 
-						<Grid item xs={12}>
+						<Grid>
 							<TextField
 								label="Description"
 								fullWidth
 								multiline
 								rows={2}
 								value={formData.description}
-								onChange={(e) => handleInputChange("description", e.target.value)}
+								onChange={e => handleInputChange("description", e.target.value)}
 								error={!!validationErrors.description}
 								helperText={validationErrors.description}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Client Name"
 								fullWidth
 								value={formData.clientName}
-								onChange={(e) => handleInputChange("clientName", e.target.value)}
+								onChange={e => handleInputChange("clientName", e.target.value)}
 								error={!!validationErrors.clientName}
 								helperText={validationErrors.clientName}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Project Manager"
 								fullWidth
 								value={formData.projectManager}
-								onChange={(e) => handleInputChange("projectManager", e.target.value)}
+								onChange={e =>
+									handleInputChange("projectManager", e.target.value)
+								}
 								error={!!validationErrors.projectManager}
 								helperText={validationErrors.projectManager}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Status"
 								select
 								fullWidth
 								value={formData.status}
-								onChange={(e) => handleInputChange("status", e.target.value)}
+								onChange={e => handleInputChange("status", e.target.value)}
 								error={!!validationErrors.status}
 								helperText={validationErrors.status}
 								required
 							>
-								{PROJECT_STATUS.map((status) => (
-									<MenuItem key={status} value={status}>
+								{PROJECT_STATUS.map(status => (
+									<MenuItem
+										key={status}
+										value={status}
+									>
 										{status}
 									</MenuItem>
 								))}
 							</TextField>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Priority"
 								select
 								fullWidth
 								value={formData.priority}
-								onChange={(e) => handleInputChange("priority", e.target.value)}
+								onChange={e => handleInputChange("priority", e.target.value)}
 								error={!!validationErrors.priority}
 								helperText={validationErrors.priority}
 								required
 							>
-								{PROJECT_PRIORITY.map((priority) => (
-									<MenuItem key={priority} value={priority}>
+								{PROJECT_PRIORITY.map(priority => (
+									<MenuItem
+										key={priority}
+										value={priority}
+									>
 										{priority}
 									</MenuItem>
 								))}
 							</TextField>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Start Date"
 								type="date"
 								fullWidth
 								value={formData.startDate}
-								onChange={(e) => handleInputChange("startDate", e.target.value)}
+								onChange={e => handleInputChange("startDate", e.target.value)}
 								error={!!validationErrors.startDate}
 								helperText={validationErrors.startDate}
 								required
@@ -455,39 +479,39 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="End Date"
 								type="date"
 								fullWidth
 								value={formData.endDate}
-								onChange={(e) => handleInputChange("endDate", e.target.value)}
+								onChange={e => handleInputChange("endDate", e.target.value)}
 								error={!!validationErrors.endDate}
 								helperText={validationErrors.endDate}
 								InputLabelProps={{ shrink: true }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={4}>
+						<Grid>
 							<TextField
 								label="Budget"
 								type="number"
 								fullWidth
 								value={formData.budget}
-								onChange={(e) => handleInputChange("budget", e.target.value)}
+								onChange={e => handleInputChange("budget", e.target.value)}
 								error={!!validationErrors.budget}
 								helperText={validationErrors.budget}
 								inputProps={{ min: 0, step: 1000 }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={4}>
+						<Grid>
 							<TextField
 								label="Hours Allocated"
 								type="number"
 								fullWidth
 								value={formData.totalHoursAllocated}
-								onChange={(e) =>
+								onChange={e =>
 									handleInputChange("totalHoursAllocated", e.target.value)
 								}
 								error={!!validationErrors.totalHoursAllocated}
@@ -496,26 +520,26 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={4}>
+						<Grid>
 							<TextField
 								label="Team Size"
 								type="number"
 								fullWidth
 								value={formData.teamSize}
-								onChange={(e) => handleInputChange("teamSize", e.target.value)}
+								onChange={e => handleInputChange("teamSize", e.target.value)}
 								error={!!validationErrors.teamSize}
 								helperText={validationErrors.teamSize}
 								inputProps={{ min: 0, step: 1 }}
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Progress (%)"
 								type="number"
 								fullWidth
 								value={formData.progress}
-								onChange={(e) => handleInputChange("progress", e.target.value)}
+								onChange={e => handleInputChange("progress", e.target.value)}
 								error={!!validationErrors.progress}
 								helperText={validationErrors.progress}
 								inputProps={{ min: 0, max: 100, step: 5 }}
@@ -523,63 +547,114 @@ const ProjectDetail = () => {
 						</Grid>
 					</Grid>
 				) : (
-					<Grid container spacing={3}>
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+					<Grid
+						container
+						spacing={3}
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+					>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								ID
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.id}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Project Code
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.projectCode}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Project Name
 							</Typography>
-							<Typography variant="h6" sx={{ mb: 2 }}>
+							<Typography
+								variant="h6"
+								sx={{ mb: 2 }}
+							>
 								{project.projectName}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Description
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.description || "No description"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Client Name
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.clientName || "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Project Manager
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.projectManager || "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Status
 							</Typography>
 							<Chip
@@ -589,8 +664,12 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Priority
 							</Typography>
 							<Chip
@@ -600,57 +679,96 @@ const ProjectDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Start Date
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{new Date(project.startDate).toLocaleDateString()}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								End Date
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.endDate
 									? new Date(project.endDate).toLocaleDateString()
 									: "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={4}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Budget
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.budget ? `$${project.budget.toLocaleString()}` : "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={4}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Hours Allocated
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.totalHoursAllocated
 									? `${project.totalHoursAllocated}h`
 									: "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={4}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Team Size
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{project.teamSize || "N/A"}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Progress
 							</Typography>
 							<Box sx={{ display: "flex", alignItems: "center" }}>
@@ -662,7 +780,10 @@ const ProjectDetail = () => {
 									/>
 								</Box>
 								<Box sx={{ minWidth: 35 }}>
-									<Typography variant="body2" color="text.secondary">
+									<Typography
+										variant="body2"
+										color="text.secondary"
+									>
 										{project.progress || 0}%
 									</Typography>
 								</Box>

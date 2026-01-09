@@ -39,7 +39,9 @@ const EmployeeDetail = () => {
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 	const [editMode, setEditMode] = useState(false);
 	const [formData, setFormData] = useState<any>({});
-	const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+	const [validationErrors, setValidationErrors] = useState<
+		Record<string, string>
+	>({});
 
 	useEffect(() => {
 		const loadEmployee = async () => {
@@ -48,7 +50,7 @@ const EmployeeDetail = () => {
 			try {
 				setLoading(true);
 				const data = await fetchEmployees();
-				const record = data.find((e) => e.id.toString() === employeeId);
+				const record = data.find(e => e.id.toString() === employeeId);
 				setEmployee(record || null);
 
 				if (record) {
@@ -129,7 +131,7 @@ const EmployeeDetail = () => {
 			if (error instanceof yup.ValidationError) {
 				// Convert yup errors to object format
 				const errors: Record<string, string> = {};
-				error.inner.forEach((err) => {
+				error.inner.forEach(err => {
 					if (err.path) {
 						errors[err.path] = err.message;
 					}
@@ -167,7 +169,7 @@ const EmployeeDetail = () => {
 		setFormData((prev: any) => ({ ...prev, [field]: value }));
 		// Clear validation error for this field
 		if (validationErrors[field]) {
-			setValidationErrors((prev) => {
+			setValidationErrors(prev => {
 				const newErrors = { ...prev };
 				delete newErrors[field];
 				return newErrors;
@@ -195,7 +197,11 @@ const EmployeeDetail = () => {
 			<Box sx={{ p: 3 }}>
 				<Paper sx={{ p: 3 }}>
 					<Typography variant="h6">Employee not found</Typography>
-					<Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
+					<Button
+						startIcon={<ArrowBackIcon />}
+						onClick={handleBack}
+						sx={{ mt: 2 }}
+					>
 						Back to List
 					</Button>
 				</Paper>
@@ -205,9 +211,15 @@ const EmployeeDetail = () => {
 
 	return (
 		<Box sx={{ height: "100%", width: "100%", p: 3 }}>
-			<Paper elevation={2} sx={{ p: 3 }}>
+			<Paper
+				elevation={2}
+				sx={{ p: 3 }}
+			>
 				<Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-					<IconButton onClick={handleBack} sx={{ mr: 2 }}>
+					<IconButton
+						onClick={handleBack}
+						sx={{ mr: 2 }}
+					>
 						<ArrowBackIcon />
 					</IconButton>
 					<Typography
@@ -274,18 +286,26 @@ const EmployeeDetail = () => {
 					>
 						{employee.empName.charAt(0).toUpperCase()}
 					</Avatar>
-					<Box>
+					<Box
+						display={"flex"}
+						gap={2}
+						alignItems={"center"}
+					>
 						{editMode ? (
 							<TextField
 								label="Name"
 								value={formData.empName}
-								onChange={(e) => handleInputChange("empName", e.target.value)}
+								onChange={e => handleInputChange("empName", e.target.value)}
 								error={!!validationErrors.empName}
 								helperText={validationErrors.empName}
 								sx={{ mb: 1 }}
+								disabled
 							/>
 						) : (
-							<Typography variant="h4" gutterBottom>
+							<Typography
+								variant="h4"
+								gutterBottom
+							>
 								{employee.empName}
 							</Typography>
 						)}
@@ -293,12 +313,15 @@ const EmployeeDetail = () => {
 							<TextField
 								label="Position"
 								value={formData.position}
-								onChange={(e) => handleInputChange("position", e.target.value)}
+								onChange={e => handleInputChange("position", e.target.value)}
 								error={!!validationErrors.position}
 								helperText={validationErrors.position}
 							/>
 						) : (
-							<Typography variant="body1" color="text.secondary">
+							<Typography
+								variant="body1"
+								color="text.secondary"
+							>
 								{employee.position}
 							</Typography>
 						)}
@@ -306,8 +329,13 @@ const EmployeeDetail = () => {
 				</Box>
 
 				{editMode ? (
-					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
+					<Grid
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+						container
+						spacing={2}
+					>
+						<Grid>
 							<TextField
 								label="Employee ID"
 								fullWidth
@@ -316,57 +344,60 @@ const EmployeeDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Email"
 								type="email"
 								fullWidth
 								value={formData.email}
-								onChange={(e) => handleInputChange("email", e.target.value)}
+								onChange={e => handleInputChange("email", e.target.value)}
 								error={!!validationErrors.email}
 								helperText={validationErrors.email}
 								required
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Position"
 								fullWidth
 								value={formData.position}
-								onChange={(e) => handleInputChange("position", e.target.value)}
+								onChange={e => handleInputChange("position", e.target.value)}
 								error={!!validationErrors.position}
 								helperText={validationErrors.position}
 								required
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Department"
 								select
 								fullWidth
 								value={formData.department}
-								onChange={(e) => handleInputChange("department", e.target.value)}
+								onChange={e => handleInputChange("department", e.target.value)}
 								error={!!validationErrors.department}
 								helperText={validationErrors.department}
 								required
 							>
-								{DEPARTMENTS.map((dept) => (
-									<MenuItem key={dept} value={dept}>
+								{DEPARTMENTS.map(dept => (
+									<MenuItem
+										key={dept}
+										value={dept}
+									>
 										{dept}
 									</MenuItem>
 								))}
 							</TextField>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
 								label="Hire Date"
 								type="date"
 								fullWidth
 								value={formData.hireDate}
-								onChange={(e) => handleInputChange("hireDate", e.target.value)}
+								onChange={e => handleInputChange("hireDate", e.target.value)}
 								error={!!validationErrors.hireDate}
 								helperText={validationErrors.hireDate}
 								required
@@ -374,75 +405,124 @@ const EmployeeDetail = () => {
 							/>
 						</Grid>
 
-						<Grid item xs={12} sm={6}>
+						<Grid>
 							<TextField
-								label="Years with Company"
+								label="Year(s) with Company"
 								fullWidth
 								value={`${Math.floor(
-									(new Date().getTime() - new Date(employee.hireDate).getTime()) /
+									(new Date().getTime() -
+										new Date(employee.hireDate).getTime()) /
 										(1000 * 60 * 60 * 24 * 365)
-								)} years`}
+								)} year(s)`}
 								disabled
 							/>
 						</Grid>
 					</Grid>
 				) : (
-					<Grid container spacing={3}>
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+					<Grid
+						display={"grid"}
+						gridTemplateColumns={"1fr 1fr"}
+						container
+						spacing={3}
+					>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Employee ID
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{employee.id}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Email
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{employee.email}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Position
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{employee.position}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Department
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{employee.department}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
 								Hire Date
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{new Date(employee.hireDate).toLocaleDateString()}
 							</Typography>
 						</Grid>
 
-						<Grid item xs={12} md={6}>
-							<Typography variant="subtitle2" color="text.secondary" gutterBottom>
-								Years with Company
+						<Grid>
+							<Typography
+								variant="subtitle2"
+								color="text.secondary"
+								gutterBottom
+							>
+								Year(s) with Company
 							</Typography>
-							<Typography variant="body1" sx={{ mb: 2 }}>
+							<Typography
+								variant="body1"
+								sx={{ mb: 2 }}
+							>
 								{Math.floor(
-									(new Date().getTime() - new Date(employee.hireDate).getTime()) /
+									(new Date().getTime() -
+										new Date(employee.hireDate).getTime()) /
 										(1000 * 60 * 60 * 24 * 365)
 								)}{" "}
-								years
+								year(s)
 							</Typography>
 						</Grid>
 					</Grid>
