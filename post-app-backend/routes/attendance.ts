@@ -1,11 +1,13 @@
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import Attendance from "../models/Attendance";
 import Emp from "../models/Emp";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { requireAdmin } from "../middleware/authorize";
 
 const router = express.Router();
 
-// Create a new attendance record
-router.post("/", async (req: Request, res: Response) => {
+// Create a new attendance record (Admin only)
+router.post("/", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const newAttendance = new Attendance(req.body);
 		const savedAttendance = await newAttendance.save();
@@ -21,14 +23,22 @@ router.post("/", async (req: Request, res: Response) => {
 	}
 });
 
-// Get all attendance records with optional filters
-router.get("/", async (req: Request, res: Response) => {
+// Get all attendance records with optional filters (Admin sees all, User sees only their own)
+router.get("/", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
+		const user = req.user;
 		const { employeeId, startDate, endDate, status } = req.query;
 		let query: any = {};
 
-		if (employeeId) {
-			query.employeeId = Number(employeeId);
+		// Data filtering based on role
+		if (user?.role === 'admin') {
+			// Admin can filter by any employeeId
+			if (employeeId) {
+				query.employeeId = Number(employeeId);
+			}
+		} else {
+			// Regular user can only see their own records
+			query.employeeId = user?.userId;
 		}
 
 		if (startDate || endDate) {
@@ -52,19 +62,31 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-// Get attendance record by ID
-router.get("/:id", async (req: Request, res: Response) => {
+// Get attendance record by ID (Admin can view any, User can only view their own)
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
+		const user = req.user;
 		const attendance = await Attendance.findOne({ id: req.params.id });
-		if (!attendance) return res.status(404).json({ error: "Not found" });
+
+		if (!attendance) {
+			res.status(404).json({ error: "Attendance record not found" });
+			return;
+		}
+
+		// Check authorization: user can only view their own records
+		if (user?.role !== 'admin' && attendance.employeeId !== user?.userId) {
+			res.status(403).json({ error: "Access denied. You can only view your own records." });
+			return;
+		}
+
 		res.json(attendance);
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// Update attendance record by ID
-router.put("/:id", async (req: Request, res: Response) => {
+// Update attendance record by ID (Admin only)
+router.put("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const updatedAttendance = await Attendance.findOneAndUpdate(
 			{ id: req.params.id },
@@ -74,39 +96,53 @@ router.put("/:id", async (req: Request, res: Response) => {
 				runValidators: true,
 			}
 		);
-		if (!updatedAttendance)
-			return res.status(404).json({ error: "Not found" });
+
+		if (!updatedAttendance) {
+			res.status(404).json({ error: "Attendance record not found" });
+			return;
+		}
+
 		res.json(updatedAttendance);
 	} catch (error: any) {
 		res.status(400).json({ error: error.message });
 	}
 });
 
-// Delete attendance record by ID
-router.delete("/:id", async (req: Request, res: Response) => {
+// Delete attendance record by ID (Admin only)
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const deletedAttendance = await Attendance.findOneAndDelete({
 			id: req.params.id,
 		});
 
-		if (!deletedAttendance)
-			return res.status(404).json({ error: "Not found" });
-		res.json({ message: "Deleted successfully" });
+		if (!deletedAttendance) {
+			res.status(404).json({ error: "Attendance record not found" });
+			return;
+		}
+
+		res.json({ message: "Attendance record deleted successfully" });
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
 });
 
-// Get attendance statistics
-router.get("/stats/summary", async (req: Request, res: Response) => {
+// Get attendance statistics (Admin sees all, User sees only their own stats)
+router.get("/stats/summary", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
+		const user = req.user;
 		const { employeeId, period, year, month } = req.query;
 
 		let matchStage: any = {};
 
-		// Filter by employee if provided
-		if (employeeId) {
-			matchStage.employeeId = Number(employeeId);
+		// Data filtering based on role
+		if (user?.role === 'admin') {
+			// Admin can filter by any employeeId
+			if (employeeId) {
+				matchStage.employeeId = Number(employeeId);
+			}
+		} else {
+			// Regular user can only see their own stats
+			matchStage.employeeId = user?.userId;
 		}
 
 		// Filter by period
@@ -198,15 +234,23 @@ router.get("/stats/summary", async (req: Request, res: Response) => {
 	}
 });
 
-// Get attendance trends (for charts)
-router.get("/stats/trends", async (req: Request, res: Response) => {
+// Get attendance trends (for charts) (Admin sees all, User sees only their own trends)
+router.get("/stats/trends", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
+		const user = req.user;
 		const { employeeId, period, year, month } = req.query;
 
 		let matchStage: any = {};
 
-		if (employeeId) {
-			matchStage.employeeId = Number(employeeId);
+		// Data filtering based on role
+		if (user?.role === 'admin') {
+			// Admin can filter by any employeeId
+			if (employeeId) {
+				matchStage.employeeId = Number(employeeId);
+			}
+		} else {
+			// Regular user can only see their own trends
+			matchStage.employeeId = user?.userId;
 		}
 
 		const currentDate = new Date();

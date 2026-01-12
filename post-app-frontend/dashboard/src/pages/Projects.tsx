@@ -17,9 +17,11 @@ import { useProjects } from "../hooks/projects/useProjects";
 import { PROJECT_STATUS, PROJECT_PRIORITY } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProjectsPage = () => {
+	const { isAdmin } = useAuth();
 	const {
 		projects,
 		loading,
@@ -36,12 +38,12 @@ const ProjectsPage = () => {
 		validationErrors,
 		confirmDialogOpen,
 		deleteTarget,
-	} = useProjects();
+	} = useProjects({ isAdmin });
 
 	const navigate = useNavigate();
 	const [searchText, setSearchText] = useState("");
 
-	const filteredProjects = projects.filter((project) => {
+	const filteredProjects = projects.filter(project => {
 		const searchLower = searchText.toLowerCase();
 		return (
 			project.id.toString().includes(searchLower) ||
@@ -80,14 +82,16 @@ const ProjectsPage = () => {
 					>
 						Projects Management
 					</Typography>
-					<Button
-						variant="contained"
-						startIcon={<AddIcon />}
-						onClick={handleAddClick}
-						sx={{ textTransform: "none" }}
-					>
-						Add Project
-					</Button>
+					{isAdmin && (
+						<Button
+							variant="contained"
+							startIcon={<AddIcon />}
+							onClick={handleAddClick}
+							sx={{ textTransform: "none" }}
+						>
+							Add Project
+						</Button>
+					)}
 				</Box>
 
 				<Box sx={{ px: 2, pb: 2 }}>
@@ -96,7 +100,7 @@ const ProjectsPage = () => {
 						variant="outlined"
 						placeholder="Search projects..."
 						value={searchText}
-						onChange={(e) => setSearchText(e.target.value)}
+						onChange={e => setSearchText(e.target.value)}
 						InputProps={{
 							startAdornment: (
 								<InputAdornment position="start">

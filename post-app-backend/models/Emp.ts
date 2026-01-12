@@ -7,6 +7,11 @@ export interface IEmployee extends Document {
 	position: string;
 	department: string;
 	hireDate: Date;
+	email: string;
+	password: string;
+	role: 'admin' | 'user';
+	isFirstLogin: boolean;
+	passwordLastChanged?: Date;
 }
 
 const EmployeeSchema: Schema = new Schema({
@@ -16,6 +21,10 @@ const EmployeeSchema: Schema = new Schema({
 	department: { type: String, required: true },
 	hireDate: { type: String, required: true },
 	email: { type: String, required: true, unique: true },
+	password: { type: String, required: true, select: false },
+	role: { type: String, enum: ['admin', 'user'], default: 'user' },
+	isFirstLogin: { type: Boolean, default: true },
+	passwordLastChanged: { type: Date },
 });
 // Create a virtual field
 EmployeeSchema.pre("validate", async function (next) {

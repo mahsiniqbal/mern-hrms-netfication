@@ -1,11 +1,13 @@
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import Project, { IProject } from "../models/Project";
 import ProjectWorkLog from "../models/ProjectWorkLog";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { requireAdmin } from "../middleware/authorize";
 
 const router = express.Router();
 
-// Get all projects
-router.get("/", async (req: Request, res: Response) => {
+// Get all projects (Both admin and users can view all projects)
+router.get("/", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
 		const projects = await Project.find().sort({ createdAt: -1 });
 		res.json(projects);
@@ -14,12 +16,13 @@ router.get("/", async (req: Request, res: Response) => {
 	}
 });
 
-// Get single project by ID
-router.get("/:id", async (req: Request, res: Response) => {
+// Get single project by ID (Both admin and users can view)
+router.get("/:id", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
 		const project = await Project.findOne({ id: parseInt(req.params.id) });
 		if (!project) {
-			return res.status(404).json({ message: "Project not found" });
+			res.status(404).json({ message: "Project not found" });
+			return;
 		}
 		res.json(project);
 	} catch (error: any) {
@@ -27,8 +30,8 @@ router.get("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-// Create new project
-router.post("/", async (req: Request, res: Response) => {
+// Create new project (Admin only)
+router.post("/", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const project = new Project(req.body);
 		const newProject = await project.save();
@@ -38,8 +41,8 @@ router.post("/", async (req: Request, res: Response) => {
 	}
 });
 
-// Update project
-router.put("/:id", async (req: Request, res: Response) => {
+// Update project (Admin only)
+router.put("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const project = await Project.findOneAndUpdate(
 			{ id: parseInt(req.params.id) },
@@ -47,7 +50,8 @@ router.put("/:id", async (req: Request, res: Response) => {
 			{ new: true, runValidators: true }
 		);
 		if (!project) {
-			return res.status(404).json({ message: "Project not found" });
+			res.status(404).json({ message: "Project not found" });
+			return;
 		}
 		res.json(project);
 	} catch (error: any) {
@@ -55,14 +59,15 @@ router.put("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-// Delete project
-router.delete("/:id", async (req: Request, res: Response) => {
+// Delete project (Admin only)
+router.delete("/:id", authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
 	try {
 		const project = await Project.findOneAndDelete({
 			id: parseInt(req.params.id),
 		});
 		if (!project) {
-			return res.status(404).json({ message: "Project not found" });
+			res.status(404).json({ message: "Project not found" });
+			return;
 		}
 		// Also delete all work logs for this project
 		await ProjectWorkLog.deleteMany({ projectId: parseInt(req.params.id) });
@@ -72,8 +77,8 @@ router.delete("/:id", async (req: Request, res: Response) => {
 	}
 });
 
-// Get project statistics
-router.get("/stats/summary", async (req: Request, res: Response) => {
+// Get project statistics (Admin sees all, User sees filtered by their work logs)
+router.get("/stats/summary", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
 		const { projectId, year, month } = req.query;
 
@@ -155,8 +160,8 @@ router.get("/stats/summary", async (req: Request, res: Response) => {
 	}
 });
 
-// Get project work hours trends
-router.get("/stats/trends", async (req: Request, res: Response) => {
+// Get project work hours trends (Admin sees all, User sees filtered by their work logs)
+router.get("/stats/trends", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
 		const { projectId, period = "month", year, month } = req.query;
 
@@ -218,8 +223,8 @@ router.get("/stats/trends", async (req: Request, res: Response) => {
 	}
 });
 
-// Get employee work rate by project
-router.get("/stats/employee-work-rate", async (req: Request, res: Response) => {
+// Get employee work rate by project (Admin sees all, User sees filtered by their work logs)
+router.get("/stats/employee-work-rate", authenticateToken, async (req: AuthRequest, res: Response) => {
 	try {
 		const { projectId, year, month } = req.query;
 

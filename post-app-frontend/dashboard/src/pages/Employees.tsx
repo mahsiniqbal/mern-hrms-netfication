@@ -17,9 +17,11 @@ import { useEmployees } from "../hooks/employees/useEmployees";
 import { DEPARTMENTS } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const EmployeesPage = () => {
+	const { isAdmin } = useAuth();
 	const {
 		employees,
 		loading,
@@ -38,12 +40,12 @@ const EmployeesPage = () => {
 		validationErrors,
 		paginationModel,
 		setPaginationModel,
-	} = useEmployees();
+	} = useEmployees({ isAdmin });
 
 	const navigate = useNavigate();
 	const [searchText, setSearchText] = useState("");
 
-	const filteredEmployees = employees.filter((employee) => {
+	const filteredEmployees = employees.filter(employee => {
 		const searchLower = searchText.toLowerCase();
 		return (
 			employee.id.toString().includes(searchLower) ||
@@ -79,14 +81,16 @@ const EmployeesPage = () => {
 					>
 						Employees Management
 					</Typography>
-					<Button
-						variant="contained"
-						startIcon={<AddIcon />}
-						onClick={handleAddClick}
-						sx={{ textTransform: "none" }}
-					>
-						Add Employee
-					</Button>
+					{isAdmin && (
+						<Button
+							variant="contained"
+							startIcon={<AddIcon />}
+							onClick={handleAddClick}
+							sx={{ textTransform: "none" }}
+						>
+							Add Employee
+						</Button>
+					)}
 				</Box>
 
 				<Box sx={{ px: 2, pb: 2 }}>
@@ -95,7 +99,7 @@ const EmployeesPage = () => {
 						variant="outlined"
 						placeholder="Search employees..."
 						value={searchText}
-						onChange={(e) => setSearchText(e.target.value)}
+						onChange={e => setSearchText(e.target.value)}
 						InputProps={{
 							startAdornment: (
 								<InputAdornment position="start">

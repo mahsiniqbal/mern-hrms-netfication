@@ -1,15 +1,25 @@
+// Auth interfaces
 export interface LoginRequest {
 	email: string;
 	password: string;
 }
 
+export interface IUser {
+	id: number;
+	email: string;
+	empName: string;
+	role: 'admin' | 'user';
+	isFirstLogin: boolean;
+}
+
 export interface LoginResponse {
 	token: string;
-	user: {
-		id: number;
-		email: string;
-		name: string;
-	};
+	user: IUser;
+}
+
+export interface ChangePasswordRequest {
+	oldPassword: string;
+	newPassword: string;
 }
 
 // User profile response

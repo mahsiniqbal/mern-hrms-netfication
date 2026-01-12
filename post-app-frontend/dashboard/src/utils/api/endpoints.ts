@@ -1,5 +1,10 @@
 const API = {
+	// Auth endpoints
 	LOGIN: "/auth/login",
+	CHANGE_PASSWORD: "/auth/change-password",
+	ME: "/auth/me",
+
+	// Other endpoints
 	PROFILE: "/user/profile",
 	EMPLOYESS: "/employees",
 	ATTENDANCE: "/attendance",

@@ -18,7 +18,12 @@ import * as yup from "yup";
 import { projectValidationSchema } from "../../forms/validationSchemas";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 
-export const useProjects = () => {
+interface UseProjectsProps {
+	isAdmin?: boolean;
+}
+
+export const useProjects = (props?: UseProjectsProps) => {
+	const { isAdmin = false } = props || {};
 	const [projects, setProjects] = useState<IProject[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -272,7 +277,7 @@ export const useProjects = () => {
 		}
 	};
 
-	const columns: GridColDef[] = [
+	const baseColumns: GridColDef[] = [
 		{
 			field: "id",
 			headerName: "ID",
@@ -376,26 +381,29 @@ export const useProjects = () => {
 				return new Date(value).toLocaleDateString();
 			},
 		},
-		{
-			field: "actions",
-			type: "actions",
-			headerName: "Actions",
-			width: 100,
-			getActions: (params: GridRowParams<IProject>) => [
-				<GridActionsCellItem
-					icon={<EditIcon />}
-					label="Edit"
-					onClick={() => handleEditClick(params.row)}
-					color="primary"
-				/>,
-				<GridActionsCellItem
-					icon={<DeleteIcon color="error" />}
-					label="Delete"
-					onClick={() => handleDeleteClick(params.row)}
-				/>,
-			],
-		},
 	];
+
+	const actionsColumn: GridColDef = {
+		field: "actions",
+		type: "actions",
+		headerName: "Actions",
+		width: 100,
+		getActions: (params: GridRowParams<IProject>) => [
+			<GridActionsCellItem
+				icon={<EditIcon />}
+				label="Edit"
+				onClick={() => handleEditClick(params.row)}
+				color="primary"
+			/>,
+			<GridActionsCellItem
+				icon={<DeleteIcon color="error" />}
+				label="Delete"
+				onClick={() => handleDeleteClick(params.row)}
+			/>,
+		],
+	};
+
+	const columns = isAdmin ? [...baseColumns, actionsColumn] : baseColumns;
 
 	return {
 		projects,

@@ -1,4 +1,4 @@
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import {
 	Dialog,
 	DialogTitle,
@@ -18,9 +18,11 @@ import { useAttendance } from "../hooks/attendance/useAttendance";
 import { ATTENDANCE_STATUS } from "../constants";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const AttendancePage = () => {
+	const { isAdmin } = useAuth();
 	const {
 		attendance,
 		employees,
@@ -39,18 +41,21 @@ const AttendancePage = () => {
 		handleEmployeeChange,
 		handleCancelDelete,
 		handleConfirmDelete,
-	} = useAttendance();
+	} = useAttendance({ isAdmin });
 
 	const navigate = useNavigate();
 	const [searchText, setSearchText] = useState("");
 
-	const filteredAttendance = attendance.filter((record) => {
+	const filteredAttendance = attendance.filter(record => {
 		const searchLower = searchText.toLowerCase();
 		return (
 			record.id.toString().includes(searchLower) ||
 			record.employeeName.toLowerCase().includes(searchLower) ||
 			record.status.toLowerCase().includes(searchLower) ||
-			new Date(record.date).toLocaleDateString().toLowerCase().includes(searchLower) ||
+			new Date(record.date)
+				.toLocaleDateString()
+				.toLowerCase()
+				.includes(searchLower) ||
 			record.checkInTime?.toLowerCase().includes(searchLower) ||
 			record.checkOutTime?.toLowerCase().includes(searchLower) ||
 			record.notes?.toLowerCase().includes(searchLower)
@@ -83,14 +88,16 @@ const AttendancePage = () => {
 						Attendance Management
 					</Typography>
 
-					<Button
-						variant="contained"
-						startIcon={<AddIcon />}
-						onClick={handleAddClick}
-						sx={{ textTransform: "none" }}
-					>
-						Add Attendance
-					</Button>
+					{isAdmin && (
+						<Button
+							variant="contained"
+							startIcon={<AddIcon />}
+							onClick={handleAddClick}
+							sx={{ textTransform: "none" }}
+						>
+							Add Attendance
+						</Button>
+					)}
 				</Box>
 
 				<Box sx={{ px: 2, pb: 2 }}>
@@ -99,7 +106,7 @@ const AttendancePage = () => {
 						variant="outlined"
 						placeholder="Search attendance records..."
 						value={searchText}
-						onChange={(e) => setSearchText(e.target.value)}
+						onChange={e => setSearchText(e.target.value)}
 						InputProps={{
 							startAdornment: (
 								<InputAdornment position="start">

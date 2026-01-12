@@ -22,7 +22,12 @@ import { AttendanceFormData } from "../../types/types";
 import { attendanceValidationSchema } from "../../forms/validationSchemas";
 import * as yup from "yup";
 
-export const useAttendance = () => {
+interface UseAttendanceProps {
+	isAdmin?: boolean;
+}
+
+export const useAttendance = (props?: UseAttendanceProps) => {
+	const { isAdmin = false } = props || {};
 	const [attendance, setAttendance] = useState<IAttendance[]>([]);
 	const [employees, setEmployees] = useState<IEmployee[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -264,7 +269,7 @@ export const useAttendance = () => {
 		setRefreshTrigger(prev => prev + 1);
 	}, []);
 
-	const columns: GridColDef[] = [
+	const baseColumns: GridColDef[] = [
 		{
 			field: "id",
 			headerName: "ID",
@@ -356,25 +361,28 @@ export const useAttendance = () => {
 				);
 			},
 		},
-		{
-			field: "actions",
-			type: "actions",
-			headerName: "Actions",
-			width: 100,
-			getActions: (params: GridRowParams<IAttendance>) => [
-				<GridActionsCellItem
-					icon={<EditIcon color="primary" />}
-					label="Edit"
-					onClick={() => handleEditClick(params.row)}
-				/>,
-				<GridActionsCellItem
-					icon={<DeleteIcon color="error" />}
-					label="Delete"
-					onClick={() => handleDeleteClick(params.row)}
-				/>,
-			],
-		},
 	];
+
+	const actionsColumn: GridColDef = {
+		field: "actions",
+		type: "actions",
+		headerName: "Actions",
+		width: 100,
+		getActions: (params: GridRowParams<IAttendance>) => [
+			<GridActionsCellItem
+				icon={<EditIcon color="primary" />}
+				label="Edit"
+				onClick={() => handleEditClick(params.row)}
+			/>,
+			<GridActionsCellItem
+				icon={<DeleteIcon color="error" />}
+				label="Delete"
+				onClick={() => handleDeleteClick(params.row)}
+			/>,
+		],
+	};
+
+	const columns = isAdmin ? [...baseColumns, actionsColumn] : baseColumns;
 	return {
 		attendance,
 		employees,

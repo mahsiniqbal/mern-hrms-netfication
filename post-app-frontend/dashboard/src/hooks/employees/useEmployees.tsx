@@ -16,7 +16,11 @@ import {
 } from "@mui/x-data-grid";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
-export const useEmployees = () => {
+interface UseEmployeesProps {
+	isAdmin?: boolean;
+}
+
+export const useEmployees = ({ isAdmin = false }: UseEmployeesProps = {}) => {
 	const [employees, setEmployees] = useState<IEmployee[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -216,7 +220,7 @@ export const useEmployees = () => {
 			}
 		}
 	};
-	const columns: GridColDef[] = [
+	const baseColumns: GridColDef[] = [
 		{
 			field: "id",
 			headerName: "ID",
@@ -258,27 +262,34 @@ export const useEmployees = () => {
 				return new Date(value).toLocaleDateString();
 			},
 		},
-		{
-			field: "actions",
-			type: "actions",
-			headerName: "Actions",
-			width: 100,
-			getActions: (params: GridRowParams<IEmployee>) => [
-				<GridActionsCellItem
-					key="edit"
-					icon={<EditIcon color="primary" />}
-					label="Edit"
-					onClick={() => handleEditClick(params.row)}
-				/>,
-				<GridActionsCellItem
-					key="delete"
-					icon={<DeleteIcon color="error" />}
-					label="Delete"
-					onClick={() => handleDeleteClick(params.row)}
-				/>,
-			],
-		},
 	];
+
+	// Add actions column only for admin users
+	const columns: GridColDef[] = isAdmin
+		? [
+				...baseColumns,
+				{
+					field: "actions",
+					type: "actions",
+					headerName: "Actions",
+					width: 100,
+					getActions: (params: GridRowParams<IEmployee>) => [
+						<GridActionsCellItem
+							key="edit"
+							icon={<EditIcon color="primary" />}
+							label="Edit"
+							onClick={() => handleEditClick(params.row)}
+						/>,
+						<GridActionsCellItem
+							key="delete"
+							icon={<DeleteIcon color="error" />}
+							label="Delete"
+							onClick={() => handleDeleteClick(params.row)}
+						/>,
+					],
+				},
+		  ]
+		: baseColumns;
 
 	return {
 		employees,

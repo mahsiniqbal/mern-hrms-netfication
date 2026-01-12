@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "../src/contexts/AuthContext";
 
-export default function App() {
+export default function AppProviders() {
 	return (
 		<AuthProvider>
 			<Outlet />
